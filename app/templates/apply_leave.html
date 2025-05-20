@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4">Apply for Leave</h2>
+<form method="POST" class="card p-4 shadow-sm">
+  <div class="mb-3">
+    <label for="start_date" class="form-label">Start Date</label>
+    <input type="date" class="form-control" name="start_date" required>
+  </div>
+  <div class="mb-3">
+    <label for="end_date" class="form-label">End Date</label>
+    <input type="date" class="form-control" name="end_date" required>
+  </div>
+  <div class="mb-3">
+    <label for="leave_type" class="form-label">Leave Type</label>
+    <select name="leave_type" class="form-select">
+      <option value="Sick">Sick</option>
+      <option value="Casual">Casual</option>
+      <option value="Paid">Paid</option>
+    </select>
+  </div>
+  <div class="mb-3">
+    <label for="reason" class="form-label">Reason</label>
+    <textarea name="reason" class="form-control" rows="3"></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary">Submit Request</button>
+</form>
+{% endblock %}

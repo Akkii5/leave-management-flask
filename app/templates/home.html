@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="text-center mt-5 text-white">
+  <h1 class="display-5 fw-bold">Welcome to the Leave Management System</h1>
+  <p class="lead text-light-opacity-75">Effortlessly apply, track, and manage employee leaves.</p>
+
+  <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
+    <a href="{{ url_for('main.register') }}" class="btn btn-success btn-lg px-4 me-sm-3 shadow-sm">Register</a>
+    <a href="{{ url_for('main.login') }}" class="btn btn-outline-light btn-lg px-4 shadow-sm">Login</a>
+  </div>
+</div>
+{% endblock %}

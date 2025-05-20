@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4">All Leave Requests</h2>
+<table class="table table-hover table-bordered">
+  <thead class="table-dark">
+    <tr>
+      <th>ID</th>
+      <th>User</th>
+      <th>Start</th>
+      <th>End</th>
+      <th>Type</th>
+      <th>Status</th>
+      <th>Reason</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for leave in leaves %}
+    <tr>
+      <td>{{ leave.id }}</td>
+      <td>{{ leave.applicant.name }}</td>
+      <td>{{ leave.start_date }}</td>
+      <td>{{ leave.end_date }}</td>
+      <td>{{ leave.leave_type }}</td>
+      <td>
+        <span class="badge bg-{{ 'success' if leave.status == 'Approved' else 'danger' if leave.status == 'Rejected' else 'warning' }}">
+          {{ leave.status }}
+        </span>
+      </td>
+      <td>{{ leave.reason }}</td>
+      <td>
+        {% if leave.status == "Pending" %}
+        <a href="{{ url_for('main.approve_leave', leave_id=leave.id) }}" class="btn btn-sm btn-success">Approve</a>
+        <a href="{{ url_for('main.reject_leave', leave_id=leave.id) }}" class="btn btn-sm btn-danger">Reject</a>
+        {% else %}
+        <i>{{ leave.status }}</i>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

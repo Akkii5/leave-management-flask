@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4">My Leave Requests</h2>
+
+<form method="POST" class="row g-3 mb-4">
+  <div class="col-md-4">
+    <select name="status" class="form-select">
+      <option value="">-- Filter by Status --</option>
+      <option value="Pending">Pending</option>
+      <option value="Approved">Approved</option>
+      <option value="Rejected">Rejected</option>
+    </select>
+  </div>
+  <div class="col-md-4">
+    <select name="leave_type" class="form-select">
+      <option value="">-- Filter by Type --</option>
+      <option value="Sick">Sick</option>
+      <option value="Casual">Casual</option>
+      <option value="Paid">Paid</option>
+    </select>
+  </div>
+  <div class="col-md-4">
+    <button class="btn btn-primary" type="submit">Apply Filters</button>
+  </div>
+</form>
+
+<table class="table table-striped table-bordered">
+  <thead class="table-dark">
+    <tr>
+      <th>Start</th>
+      <th>End</th>
+      <th>Type</th>
+      <th>Status</th>
+      <th>Reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for leave in leaves %}
+    <tr>
+      <td>{{ leave.start_date }}</td>
+      <td>{{ leave.end_date }}</td>
+      <td>{{ leave.leave_type }}</td>
+      <td>
+        <span class="badge bg-{{ 'success' if leave.status == 'Approved' else 'danger' if leave.status == 'Rejected' else 'secondary' }}">
+          {{ leave.status }}
+        </span>
+      </td>
+      <td>{{ leave.reason }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="text-center">
+  <h2>Welcome, {{ user.name }}!</h2>
+  <p class="lead">Role: <strong>{{ user.role|capitalize }}</strong></p>
+
+  {% if user.role == "employee" %}
+    <p><strong>Leave Balance:</strong> {{ user.leave_balance }} days</p>
+  {% endif %}
+
+  <div class="mt-4">
+    {% if user.role == "employee" %}
+      <a href="{{ url_for('main.apply_leave') }}" class="btn btn-primary m-2">Apply Leave</a>
+      <a href="{{ url_for('main.view_my_leaves') }}" class="btn btn-outline-secondary m-2">My Leaves</a>
+    {% elif user.role == "admin" %}
+      <a href="{{ url_for('main.admin_view_leaves') }}" class="btn btn-warning m-2">Manage Leave Requests</a>
+      <a href="{{ url_for('main.create_user') }}" class="btn btn-success m-2">Create User</a>
+    {% endif %}
+
+    <a href="{{ url_for('main.profile') }}" class="btn btn-info m-2">My Profile</a>
+    <a href="{{ url_for('main.logout') }}" class="btn btn-danger m-2">Logout</a>
+  </div>
+</div>
+{% endblock %}

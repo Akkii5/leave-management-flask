@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Create New User</h2>
+<form method="POST" class="card p-4 shadow-sm">
+  <div class="mb-3">
+    <label>Name</label>
+    <input type="text" name="name" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label>Email</label>
+    <input type="email" name="email" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label>Password</label>
+    <input type="password" name="password" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label>Role</label>
+    <select name="role" class="form-select">
+      <option value="employee">Employee</option>
+      <option value="admin">Admin</option>
+    </select>
+  </div>
+  <div class="mb-3">
+    <label>Leave Balance</label>
+    <input type="number" name="leave_balance" class="form-control" value="20" required>
+  </div>
+  <button class="btn btn-success">Create User</button>
+</form>
+{% endblock %}
