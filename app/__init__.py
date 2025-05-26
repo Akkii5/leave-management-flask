@@ -10,7 +10,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 bcrypt = Bcrypt()
 login_manager = LoginManager()
-login_manager.login_view = 'login'  # Redirect to 'login' route when login is required
+login_manager.login_view = 'main.login'  # Redirect to 'login' route when login is required
 
 def create_app():
     app = Flask(__name__)

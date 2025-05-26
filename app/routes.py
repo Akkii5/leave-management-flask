@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
-from app import db, bcrypt
-from app.models import User, LeaveRequest
 from datetime import datetime
 from werkzeug.security import generate_password_hash
-from app.models import User, LeaveRequest
+from app import db
+from app.models import LeaveBalance, User, LeaveRequest
+from werkzeug.security import check_password_hash
 
 main = Blueprint('main', __name__)
 
@@ -19,32 +19,34 @@ def register():
     if request.method == 'POST':
         name = request.form['name']
         email = request.form['email']
-        password = request.form['password']
+        password = generate_password_hash(request.form['password'], method='sha256')
         role = request.form['role']
-        existing_user = User.query.filter_by(email=email).first()
 
-        if existing_user:
-            flash('Email already registered.', 'warning')
-            return redirect(url_for('main.register'))
-
-        hashed_pw = bcrypt.generate_password_hash(password).decode('utf-8')
-        user = User(name=name, email=email, password=hashed_pw, role=role, leave_balance=20)
-        db.session.add(user)
+        new_user = User(name=name, email=email, password=password, role=role)
+        db.session.add(new_user)
         db.session.commit()
 
-        flash('Registered successfully! Please login.', 'success')
-        return redirect(url_for('main.login'))
+        # Create initial leave balances
+        casual = LeaveBalance(user_id=new_user.id, leave_type='Casual', total=12, used=0)
+        sick = LeaveBalance(user_id=new_user.id, leave_type='Sick', total=6, used=0)
+        db.session.add_all([casual, sick])
+        db.session.commit()
+
+        flash("User registered successfully with leave balances.", "success")
+        return redirect(url_for('main.dashboard'))
 
     return render_template('register.html')
+
+
 
 @main.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-
         user = User.query.filter_by(email=email).first()
-        if user and bcrypt.check_password_hash(user.password, password):
+
+        if user and check_password_hash(user.password, password):
             login_user(user)
             flash('Login successful!', 'success')
             return redirect(url_for('main.dashboard'))
@@ -57,7 +59,9 @@ def login():
 @main.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template("dashboard.html", user=current_user)
+    balances = LeaveBalance.query.filter_by(user_id=current_user.id).all()
+    return render_template('dashboard.html', leave_balances=balances, user=current_user)
+
 
 
 @main.route("/logout")
@@ -72,17 +76,14 @@ def logout():
 @login_required
 def apply_leave():
     if request.method == "POST":
-        start_date = request.form["start_date"]
-        end_date = request.form["end_date"]
-        leave_type = request.form["leave_type"]
-        reason = request.form["reason"]
-
+        start_date = datetime.strptime(request.form["start_date"], "%Y-%m-%d")
+        end_date = datetime.strptime(request.form["end_date"], "%Y-%m-%d")
         leave = LeaveRequest(
             user_id=current_user.id,
-            start_date=datetime.strptime(start_date, "%Y-%m-%d"),
-            end_date=datetime.strptime(end_date, "%Y-%m-%d"),
-            leave_type=leave_type,
-            reason=reason
+            start_date=start_date,
+            end_date=end_date,
+            leave_type=request.form["leave_type"],
+            reason=request.form["reason"]
         )
         db.session.add(leave)
         db.session.commit()
@@ -95,17 +96,17 @@ def apply_leave():
 @main.route('/my-leaves', methods=['GET', 'POST'])
 @login_required
 def view_my_leaves():
-    filters = {}
+    filters = {'user_id': current_user.id}
+
     if request.method == 'POST':
         status = request.form.get('status')
         leave_type = request.form.get('leave_type')
-
         if status:
             filters['status'] = status
         if leave_type:
             filters['leave_type'] = leave_type
 
-    leaves = LeaveRequest.query.filter_by(user_id=current_user.id, **filters).order_by(LeaveRequest.start_date.desc()).all()
+    leaves = LeaveRequest.query.filter_by(**filters).order_by(LeaveRequest.start_date.desc()).all()
     return render_template('my_leaves.html', leaves=leaves)
 
 
@@ -116,36 +117,36 @@ def admin_view_leaves():
         flash("Access denied!", "danger")
         return redirect(url_for("main.dashboard"))
 
-    leaves = LeaveRequest.query.all()
+    leaves = LeaveRequest.query.order_by(LeaveRequest.start_date.desc()).all()
     return render_template("admin_leaves.html", leaves=leaves)
 
 
-@main.route('/admin/approve/<int:leave_id>')
+@main.route('/approve/<int:leave_id>')
 @login_required
 def approve_leave(leave_id):
-    if current_user.role != 'admin':
-        flash("Unauthorized access.", "danger")
-        return redirect(url_for('main.dashboard'))
-
     leave = LeaveRequest.query.get_or_404(leave_id)
-    user = User.query.get(leave.user_id)
-
-    # Calculate leave days
+    user = leave.applicant  # This is the User object
     leave_days = (leave.end_date - leave.start_date).days + 1
 
-    if leave.status != 'Pending':
-        flash('Leave already processed.', 'info')
-    elif user.leave_balance is None:
-        flash("User's leave balance is not set. Please update their profile.", "danger")
-    elif user.leave_balance < leave_days:
-        flash("User doesn't have enough leave balance.", "danger")
-    else:
-        leave.status = 'Approved'
-        user.leave_balance -= leave_days
-        db.session.commit()
-        flash('Leave approved successfully.', 'success')
+    # Get the LeaveBalance record for that user and leave type
+    balance = LeaveBalance.query.filter_by(user_id=user.id, leave_type=leave.leave_type).first()
 
+    if not balance:
+        flash("Leave balance record not found for this type.", "danger")
+        return redirect(url_for('main.admin_view_leaves'))
+
+    if balance.remaining < leave_days:
+        flash(f"Insufficient {leave.leave_type} leave balance.", "danger")
+        return redirect(url_for('main.admin_view_leaves'))
+
+    # Approve and update used leave
+    leave.status = 'Approved'
+    balance.used += leave_days
+    db.session.commit()
+
+    flash("Leave approved successfully.", "success")
     return redirect(url_for('main.admin_view_leaves'))
+
 
 
 @main.route("/admin/reject/<int:leave_id>")
@@ -156,9 +157,13 @@ def reject_leave(leave_id):
         return redirect(url_for("main.dashboard"))
 
     leave = LeaveRequest.query.get_or_404(leave_id)
-    leave.status = "Rejected"
-    db.session.commit()
-    flash("Leave rejected!", "warning")
+    if leave.status != 'Pending':
+        flash('Leave already processed.', 'info')
+    else:
+        leave.status = "Rejected"
+        db.session.commit()
+        flash("Leave rejected!", "warning")
+
     return redirect(url_for("main.admin_view_leaves"))
 
 
@@ -168,8 +173,10 @@ def profile():
     if request.method == 'POST':
         current_user.name = request.form['name']
         current_user.email = request.form['email']
+
         if request.form['password']:
             current_user.password = generate_password_hash(request.form['password'])
+
         db.session.commit()
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('main.profile'))
@@ -188,13 +195,23 @@ def create_user():
         email = request.form['email']
         password = request.form['password']
         role = request.form['role']
-        leave_balance = int(request.form['leave_balance'])
 
-        hashed_pw = generate_password_hash(password)
-        new_user = User(name=name, email=email, password=hashed_pw, role=role, leave_balance=leave_balance)
+        if User.query.filter_by(email=email).first():
+            flash('Email already exists.', 'warning')
+            return redirect(url_for('main.create_user'))
+
+        hashed_pw = generate_password_hash(password, method='sha256')
+        new_user = User(name=name, email=email, password=hashed_pw, role=role)
         db.session.add(new_user)
+        db.session.commit()  # Commit to get new_user.id
+
+        # Initialize leave balances for new user
+        casual = LeaveBalance(user_id=new_user.id, leave_type='Casual', total=12, used=0)
+        sick = LeaveBalance(user_id=new_user.id, leave_type='Sick', total=6, used=0)
+        db.session.add_all([casual, sick])
         db.session.commit()
-        flash("New user created!", "success")
+
+        flash("New user created with leave balances!", "success")
         return redirect(url_for('main.create_user'))
 
     return render_template('create_user.html')

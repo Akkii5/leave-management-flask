@@ -1,19 +1,44 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Edit Profile</h2>
-<form method="POST" class="card p-4 shadow-sm">
-  <div class="mb-3">
-    <label class="form-label">Name</label>
-    <input type="text" name="name" value="{{ user.name }}" class="form-control" required>
+<div class="container mt-4">
+
+  <h2>Edit Profile</h2>
+  <form method="POST" class="card p-4 shadow-sm mb-4">
+    <div class="mb-3">
+      <label class="form-label">Name</label>
+      <input type="text" name="name" value="{{ user.name }}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Email</label>
+      <input type="email" name="email" value="{{ user.email }}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">New Password (leave blank to keep current)</label>
+      <input type="password" name="password" class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update</button>
+  </form>
+
+  <h4>Leave Balances</h4>
+  <div class="row">
+    {% for balance in current_user.leave_balances %}
+    <div class="col-md-4">
+      <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ balance.leave_type }} Leave</h5>
+          <p class="card-text">
+            <strong>Total:</strong> {{ balance.total }} days<br>
+            <strong>Used:</strong> {{ balance.used }} days<br>
+            <strong>Remaining:</strong> {{ balance.remaining }} days
+          </p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
   </div>
-  <div class="mb-3">
-    <label class="form-label">Email</label>
-    <input type="email" name="email" value="{{ user.email }}" class="form-control" required>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">New Password (leave blank to keep current)</label>
-    <input type="password" name="password" class="form-control">
-  </div>
-  <button type="submit" class="btn btn-primary">Update</button>
-</form>
+
+</div>
 {% endblock %}

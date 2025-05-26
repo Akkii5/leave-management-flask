@@ -1,18 +1,38 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="text-center">
-  <h2>Welcome, {{ user.name }}!</h2>
-  <p class="lead">Role: <strong>{{ user.role|capitalize }}</strong></p>
+  <h2>Welcome, {{ current_user.name }}!</h2>
+  <p class="lead">Role: <strong>{{ current_user.role|capitalize }}</strong></p>
 
-  {% if user.role == "employee" %}
-    <p><strong>Leave Balance:</strong> {{ user.leave_balance }} days</p>
+  {% if current_user.role == "employee" %}
+    <h4>Leave Balances</h4>
+    <table class="table table-bordered w-50 mx-auto">
+      <thead class="thead-dark">
+        <tr>
+          <th>Leave Type</th>
+          <th>Total</th>
+          <th>Used</th>
+          <th>Remaining</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for balance in leave_balances %}
+        <tr>
+          <td>{{ balance.leave_type|capitalize }}</td>
+          <td>{{ balance.total }}</td>
+          <td>{{ balance.used }}</td>
+          <td>{{ balance.total - balance.used }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   {% endif %}
 
   <div class="mt-4">
-    {% if user.role == "employee" %}
+    {% if current_user.role == "employee" %}
       <a href="{{ url_for('main.apply_leave') }}" class="btn btn-primary m-2">Apply Leave</a>
       <a href="{{ url_for('main.view_my_leaves') }}" class="btn btn-outline-secondary m-2">My Leaves</a>
-    {% elif user.role == "admin" %}
+    {% elif current_user.role == "admin" %}
       <a href="{{ url_for('main.admin_view_leaves') }}" class="btn btn-warning m-2">Manage Leave Requests</a>
       <a href="{{ url_for('main.create_user') }}" class="btn btn-success m-2">Create User</a>
     {% endif %}

@@ -1,12 +1,65 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="text-center mt-5 text-white">
-  <h1 class="display-5 fw-bold">Welcome to the Leave Management System</h1>
-  <p class="lead text-light-opacity-75">Effortlessly apply, track, and manage employee leaves.</p>
 
-  <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
-    <a href="{{ url_for('main.register') }}" class="btn btn-success btn-lg px-4 me-sm-3 shadow-sm">Register</a>
-    <a href="{{ url_for('main.login') }}" class="btn btn-outline-light btn-lg px-4 shadow-sm">Login</a>
+<!-- <style>
+  body {
+    background: url('https://images.pexels.com/photos/28428584/pexels-photo-28428584/free-photo-of-abstract-geometric-shapes-on-blue-background.jpeg') no-repeat center center fixed;
+    background-size: cover;
+  }
+
+  .overlay {
+    /* background-color: rgba(0, 0, 0, 0.6);  */
+    padding: 60px 20px;
+    border-radius: 10px;
+  }
+
+  .card {
+    background-color: rgba(255, 255, 255, 0.95);
+    border: none;
+    /* box-shadow: 0 0 10px rgba(0,0,0,0.2); */
+  }
+</style> -->
+
+<div class="container mt-5 text-white">
+  <div class="text-center overlay">
+    <h1 class="display-5 fw-bold" style="color: darkorange;">VKraft Software Services Pvt.Ltd.</h1>
+    <p class="lead text-light">Effortlessly apply, track, and manage employee leaves.</p>
+
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
+      <a href="{{ url_for('main.register') }}" class="btn btn-success btn-lg px-4 me-sm-3 shadow-sm">Register</a>
+      <a href="{{ url_for('main.login') }}" class="btn btn-outline-light btn-lg px-4 shadow-sm">Login</a>
+    </div>
+  </div>
+
+  <!-- Cards Section -->
+  <div class="row mt-5">
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 text-dark">
+        <div class="card-body text-center">
+          <h5 class="card-title">Apply for Leave</h5>
+          <p class="card-text">Submit leave requests in just a few clicks. Choose your leave type and date range easily.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 text-dark">
+        <div class="card-body text-center">
+          <h5 class="card-title">Track Leave Status</h5>
+          <p class="card-text">Stay updated with your application status and leave balance across leave types.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 text-dark">
+        <div class="card-body text-center">
+          <h5 class="card-title">Admin Controls</h5>
+          <p class="card-text">Admins can approve or reject leave applications and monitor overall employee leave usage.</p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
 {% endblock %}
