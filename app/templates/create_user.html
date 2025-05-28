@@ -6,14 +6,17 @@
     <label>Name</label>
     <input type="text" name="name" class="form-control" required>
   </div>
+
   <div class="mb-3">
     <label>Email</label>
     <input type="email" name="email" class="form-control" required>
   </div>
+
   <div class="mb-3">
     <label>Password</label>
     <input type="password" name="password" class="form-control" required>
   </div>
+
   <div class="mb-3">
     <label>Role</label>
     <select name="role" class="form-select">
@@ -21,10 +24,17 @@
       <option value="admin">Admin</option>
     </select>
   </div>
+
   <div class="mb-3">
-    <label>Leave Balance</label>
-    <input type="number" name="leave_balance" class="form-control" value="20" required>
+    <label for="reporting_manager_id">Reporting Manager</label>
+    <select name="reporting_manager_id" class="form-select">
+      <option value="">-- Select Manager --</option>
+      {% for manager in managers %}
+        <option value="{{ manager.id }}">{{ manager.name }} ({{ manager.email }})</option>
+      {% endfor %}
+    </select>
   </div>
+
   <button class="btn btn-success">Create User</button>
 </form>
 {% endblock %}

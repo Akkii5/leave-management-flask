@@ -22,9 +22,19 @@
 
       <div class="mb-3">
         <label for="role" class="form-label">Role</label>
-        <select class="form-select" id="role" name="role">
+        <select class="form-select" id="role" name="role" required>
           <option value="employee">Employee</option>
           <option value="admin">Admin</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="reporting_manager_id" class="form-label">Reporting Manager</label>
+        <select class="form-select" id="reporting_manager_id" name="reporting_manager_id">
+          <option value="">-- Select Manager --</option>
+          {% for manager in managers %}
+            <option value="{{ manager.id }}">{{ manager.name }}</option>
+          {% endfor %}
         </select>
       </div>
 

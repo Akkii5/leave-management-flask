@@ -5,25 +5,29 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from config import Config
 
-# Initialize extensions
+# Initialize Flask extensions globally
 db = SQLAlchemy()
 migrate = Migrate()
 bcrypt = Bcrypt()
 login_manager = LoginManager()
-login_manager.login_view = 'main.login'  # Redirect to 'login' route when login is required
+
+# Specify the login view for @login_required redirects
+login_manager.login_view = 'main.login'
+login_manager.login_message_category = 'warning'  # For flashed messages
 
 def create_app():
+    # Create the Flask app instance
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Initialize app with extensions
+    # Initialize the app with Flask extensions
     db.init_app(app)
     migrate.init_app(app, db)
     bcrypt.init_app(app)
     login_manager.init_app(app)
 
-    # Register Blueprints
-    from app.routes import main
-    app.register_blueprint(main)
+    # Import and register blueprints
+    from app.routes import main as main_blueprint
+    app.register_blueprint(main_blueprint)
 
     return app

@@ -1,49 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Leave Management System</title>
+  <title>{% block title %}Leave Management System{% endblock %}</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+  {% block head %}{% endblock %}
 
   <style>
-  body {
-    background: url('https://images.pexels.com/photos/28428584/pexels-photo-28428584/free-photo-of-abstract-geometric-shapes-on-blue-background.jpeg') no-repeat center center fixed;
-    background-size: cover;
-    min-height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #fff;
-    margin: 0;
-    padding-bottom: 60px;
-  }
-
-  .overlay {
-    padding: 60px 20px;
-    border-radius: 10px;
-  }
-
-  .container {
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 2rem;
-    border-radius: 15px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-    max-width: 900px;
-    margin: 2rem auto;
-  }
-
-  .card {
-    background-color: rgba(255, 255, 255, 0.95);
-    border: none;
-  }
-
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    body {
+      background: url('https://images.pexels.com/photos/28428584/pexels-photo-28428584/free-photo-of-abstract-geometric-shapes-on-blue-background.jpeg') no-repeat center center fixed;
+      background-size: cover;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      margin: 0;
+      padding-bottom: 60px;
     }
 
     .container {
-      /* background-color: rgba(0, 0, 0, 0.7); */
+      background-color: rgba(0, 0, 0, 0.7);
       padding: 2rem;
       border-radius: 15px;
       box-shadow: 0 8px 16px rgba(255, 255, 255, 0.995);
@@ -72,6 +52,15 @@
       color: #00f2fe !important;
     }
 
+    .nav-link.text-danger {
+      color: #ff5c5c !important;
+      font-weight: 600;
+    }
+
+    .nav-link.text-danger:hover {
+      color: #ff2e2e !important;
+    }
+
     .btn {
       transition: all 0.3s ease;
     }
@@ -82,6 +71,44 @@
 
     .alert {
       opacity: 0.95;
+      padding-left: 2.5rem;
+      position: relative;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .alert::before {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: "Bootstrap-icons";
+    }
+
+    .alert-success::before {
+      content: "\f058";
+      color: green;
+    }
+
+    .alert-warning::before {
+      content: "\f071";
+      color: orange;
+    }
+
+    .alert-danger::before {
+      content: "\f06a";
+      color: red;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     footer {
@@ -97,64 +124,98 @@
       font-size: 0.9rem;
       user-select: none;
     }
+
+    .notification-badge {
+      position: absolute;
+      top: 0;
+      right: 0;
+      transform: translate(50%, -50%);
+      font-size: 0.7rem;
+      font-weight: bold;
+      color: white;
+      background-color: #dc3545;
+      padding: 2px 6px;
+      border-radius: 50%;
+      line-height: 1;
+    }
   </style>
 </head>
-<body>
 
-  <!-- Navbar (always visible) -->
-  <nav class="navbar navbar-expand-lg navbar-dark">
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark" aria-label="Primary navigation">
     <div class="container-fluid">
-      <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">VKraft Software Services</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <a class="navbar-brand" href="{{ url_for('main.dashboard') }}" style="color: darkorange;">VKraft Software
+        Services</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.home') }}">Home</a></li>
+
           {% if current_user.is_authenticated %}
-            {% if current_user.role == 'employee' %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('main.apply_leave') }}">Apply Leave</a></li>
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('main.view_my_leaves') }}">My Leaves</a></li>
-            {% elif current_user.role == 'admin' %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('main.admin_view_leaves') }}">Manage Leaves</a></li>
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('main.create_user') }}">Create User</a></li>
-            {% endif %}
+          {% if current_user.role == 'employee' %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.apply_leave') }}">Apply Leave</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.view_my_leaves') }}">My Leaves</a></li>
+          {% elif current_user.role == 'admin' %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.admin_view_leaves') }}">Manage Leaves</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.create_user') }}">Create User</a></li>
+          {% endif %}
           {% endif %}
         </ul>
 
         <ul class="navbar-nav ms-auto">
           {% if current_user.is_authenticated %}
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('main.profile') }}">Profile</a></li>
-            <li class="nav-item"><a class="nav-link text-danger" href="{{ url_for('main.logout') }}">Logout</a></li>
+          <!-- Notifications -->
+          <!-- Notifications -->
+          <li class="nav-item">
+            <a class="nav-link position-relative" href="{{ url_for('main.clear_notifications') }}"
+              aria-label="Notifications">
+              <i class="bi bi-bell" style="font-size: 1.4rem;" aria-hidden="true"></i>
+              {% if notification_count > 0 %}
+              <span class="notification-badge" aria-live="polite" aria-atomic="true">
+                {{ notification_count }}
+                <span class="visually-hidden">unread notifications</span>
+              </span>
+              {% endif %}
+            </a>
+          </li>
+
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.profile') }}">Profile</a></li>
+          <li class="nav-item"><a class="nav-link text-danger" href="{{ url_for('main.logout') }}">Logout</a></li>
           {% else %}
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('main.register') }}">Register</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('main.login') }}">Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.register') }}">Register</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.login') }}">Login</a></li>
           {% endif %}
         </ul>
       </div>
     </div>
   </nav>
 
-  <!-- Flash messages and main content -->
-  <div class="container mt-4">
+  <!-- Flash messages -->
+  <main class="container mt-4" role="main" tabindex="-1">
     {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        {% endfor %}
-      {% endif %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
     {% endwith %}
 
     {% block content %}{% endblock %}
-  </div>
+  </main>
 
-  <!-- Footer -->
   <footer>© 2025 Leave Management System</footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  {% block scripts %}{% endblock %}
 </body>
+
 </html>

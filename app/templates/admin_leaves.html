@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <h2 class="mb-4">All Leave Requests</h2>
+
+<!-- DEBUG LINE -->
+<p>Logged in as: {{ current_user.name }} (Role: {{ current_user.role }})</p>
+
 <table class="table table-hover table-bordered">
   <thead class="table-dark">
     <tr>
@@ -23,13 +28,14 @@
       <td>{{ leave.end_date }}</td>
       <td>{{ leave.leave_type }}</td>
       <td>
-        <span class="badge bg-{{ 'success' if leave.status == 'Approved' else 'danger' if leave.status == 'Rejected' else 'warning' }}">
+        <span
+          class="badge bg-{{ 'success' if leave.status.lower() == 'approved' else 'danger' if leave.status.lower() == 'rejected' else 'warning' }}">
           {{ leave.status }}
         </span>
       </td>
       <td>{{ leave.reason }}</td>
       <td>
-        {% if leave.status == "Pending" %}
+        {% if leave.status.lower() == "pending" and current_user.role == "admin" %}
         <a href="{{ url_for('main.approve_leave', leave_id=leave.id) }}" class="btn btn-sm btn-success">Approve</a>
         <a href="{{ url_for('main.reject_leave', leave_id=leave.id) }}" class="btn btn-sm btn-danger">Reject</a>
         {% else %}
@@ -38,6 +44,7 @@
       </td>
     </tr>
     {% endfor %}
+
   </tbody>
 </table>
 {% endblock %}

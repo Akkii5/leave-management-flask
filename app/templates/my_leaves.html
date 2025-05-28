@@ -32,6 +32,10 @@
       <th>Type</th>
       <th>Status</th>
       <th>Reason</th>
+      <th>Effective Days</th>
+      {% if show_action_column %}
+      <th>Action</th>
+      {% endif %}
     </tr>
   </thead>
   <tbody>
@@ -41,13 +45,31 @@
       <td>{{ leave.end_date }}</td>
       <td>{{ leave.leave_type }}</td>
       <td>
-        <span class="badge bg-{{ 'success' if leave.status == 'Approved' else 'danger' if leave.status == 'Rejected' else 'secondary' }}">
+        <span
+          class="badge bg-{{ 'success' if leave.status == 'Approved' else 'danger' if leave.status == 'Rejected' else 'secondary' }}">
           {{ leave.status }}
         </span>
       </td>
       <td>{{ leave.reason }}</td>
+      <td>{{ leave.effective_days }}</td>
+      {% if show_action_column %}
+      <td>
+        {% if leave.status == 'Pending' %}
+        <form action="{{ url_for('main.delete_leave', leave_id=leave.id) }}" method="POST" style="display:inline;">
+          <button type="submit" class="btn btn-sm btn-danger"
+            onclick="return confirm('Are you sure you want to delete this pending request?');">
+            Delete
+          </button>
+        </form>
+        {% else %}
+        <!-- Leave blank or show dash -->
+        <span class="text-muted">-</span>
+        {% endif %}
+      </td>
+      {% endif %}
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
 {% endblock %}
